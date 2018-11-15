@@ -1,6 +1,8 @@
 const axios = require('axios');
 const fs = require('fs');
 const firebase = require('firebase');
+
+const namespace = 'TEMP';
 const name = 'RaspberryPi';
 
 (async () => {
@@ -21,15 +23,17 @@ const name = 'RaspberryPi';
 	});
 	let firestore = firebase.firestore();
 	firestore.settings({timestampsInSnapshots: true})
-	let data = firestore.collection('Battery').doc('temp').get();
-	if(data[name]) data[name] = [];
+	let data = (await firestore.collection('Battery').doc(namespace).get()).data();
+	if(!data[name]) data[name] = [];
 	data[name].push({
 		temp: cel,
 		charging: false,
 		percentage: '50%'
 	});
+	data.splice(0, data.length - 1440);
+
 	try {
-		await firestore.collection('Battery').doc('TEMP').set(data)
+		await firestore.collection('Battery').doc(namespace).update(data)
 		process.exit();
 	} catch(err) {
 		process.exit(1);
