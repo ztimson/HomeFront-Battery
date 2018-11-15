@@ -1,0 +1,15 @@
+{
+  "name": "homefront-battery",
+  "version": "1.0.0",
+  "description": "Battery module for HomeFront",
+  "main": "batteryEmulator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zak Timson",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "firebase": "^5.5.8"
+  }
+}
