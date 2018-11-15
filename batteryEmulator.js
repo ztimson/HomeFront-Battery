@@ -21,7 +21,7 @@ const name = 'RaspberryPi';
 	});
 	let firestore = firebase.firestore();
 	firestore.settings({timestampsInSnapshots: true})
-	let data = firestore.collection('Battery).doc('temp').get();
+	let data = firestore.collection('Battery').doc('temp').get();
 	if(data[name]) data[name] = [];
 	data[name].push({
 		temp: cel,
