@@ -31,7 +31,7 @@ const name = 'RaspberryPi';
 	try {
 		await firestore.collection('Battery').doc('TEMP').set(data)
 		process.exit();
-	} catch {
+	} catch(err) {
 		process.exit(1);
 	}
 })();
