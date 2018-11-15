@@ -28,7 +28,7 @@ const name = 'RaspberryPi';
 	data[name].push({
 		temp: cel,
 		charging: false,
-		percentage: '50%'
+		percentage: 0.5
 	});
 	data.splice(0, data.length - 1440);
 
