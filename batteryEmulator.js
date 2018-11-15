@@ -30,7 +30,7 @@ const name = 'RaspberryPi';
 		charging: false,
 		percentage: 0.5
 	});
-	data.splice(0, data.length - 1440);
+	data[name].splice(0, data.length - 1440);
 
 	try {
 		await firestore.collection('Battery').doc(namespace).update(data)
