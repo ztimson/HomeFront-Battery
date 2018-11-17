@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.18.0",
-    "firebase": "^5.5.8"
+    "firebase": "^5.5.8",
+    "serialport": "^7.0.2"
   }
 }
