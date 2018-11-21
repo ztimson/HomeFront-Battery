@@ -1,8 +1,9 @@
+const fs = require('fs');
 const SerialPort = require('serialport');
 const firebase = require('firebase');
 
 const firestore = firebase.firestore();
-const namespace = '170614D';
+const namespace = fs.readFileSync('/etc/hostname');
 const serialParser = new SerialPort('/dev/ttyUSB0').pipe(new SerialPort.parsers.Readline());
 
 firebase.initializeApp({
