@@ -1,7 +1,9 @@
 const SerialPort = require('serialport');
 const firebase = require('firebase');
 
+const firestore = firebase.firestore();
 const namespace = '170614D';
+const serialParser = new SerialPort('/dev/ttyUSB0').pipe(new SerialPort.parsers.Readline());
 
 firebase.initializeApp({
 	apiKey: "AIzaSyAs3FvBCADM66wR1-leBz6aIjK1wZfUxRo",
@@ -11,16 +13,16 @@ firebase.initializeApp({
 	storageBucket: "homefront-2ccb4.appspot.com",
 	messagingSenderId: "482384317544"
 });
+firestore.settings({timestampsInSnapshots: true});
 
+console.log('start');
 (async () => {
-	const ReadLine = SerialPort.parsers.Readline;
-	const parser = new SerailPort('/dev/ttyUSB0').pipe(new Readline());
-	
-	let firestore = firebase.firestore();
-	firestore.settings({timestampsInSnapshots: true})
 	let data = (await firestore.collection('Battery').doc(namespace).get()).data();
-	
-	parser.on('data', dataIn => {
+
+	console.log(data);
+
+	serialParser.on('data', async dataIn => {
+		console.log(dataIn);
 		let data = dataIn.match(/\d+\.?\d*/g);
 		let moduleCount = 0;
 		data = data.reduce((acc, val, i, arr) => {
@@ -29,7 +31,7 @@ firebase.initializeApp({
 			if(!acc[`Module ${moduleCount}`]) acc[`Module ${moduleCount}`] = [];
 			acc[`Module ${moduleCount}`].push({charge: val, temp: arr[i + 1]});
 		}, data);
-		
+
 		try {
 			await firestore.collection('Battery').doc(namespace).update(data)
 			process.exit();
