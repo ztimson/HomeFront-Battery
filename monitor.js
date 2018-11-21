@@ -27,7 +27,7 @@ console.log(namespace);
 			moduleCount++;
 			let name = `Module ${moduleCount}`;
 			if(!acc[name]) acc[name] = [];
-			acc[name].push({charge: val, temp: arr[i + 1]});
+			acc[name].push({charge: Number(val), temp: Number(arr[i + 1])});
 			acc[name].splice(0, acc[name].length - 1440);
 			return acc;
 		}, doc.data() || {});
