@@ -3,7 +3,7 @@ const SerialPort = require('serialport');
 const firebase = require('firebase');
 
 const namespace = fs.readFileSync('/etc/hostname', 'utf8').trim();
-const port = new SerialPort('/dev/ttyUSB0');
+const serialParser = new SerialPort('/dev/ttyUSB0').pipe(new SerialPort.parsers.Readline());
 
 firebase.initializeApp({
 	apiKey: "AIzaSyAs3FvBCADM66wR1-leBz6aIjK1wZfUxRo",
@@ -19,11 +19,15 @@ firestore.settings({timestampsInSnapshots: true});
 (async () => {
 	// Get document and data
 	let doc = await firestore.collection('Battery').doc(namespace).get();
-	let data = doc.data();
+	let data = doc.data() || {};
+	let once = true;
+	const config = data.config;
 
 	// Wait for sensor data
-	let serialParser = port.pipe(new SerialPort.parsers.Readline());
 	serialParser.on('data', async arduino => {
+		if(!once) return;
+
+		once = false;
 		let sensorData = arduino.match(/\d+\.?\d*/g);
 
 		// Divide data into modules
@@ -47,8 +51,8 @@ firestore.settings({timestampsInSnapshots: true});
 		// Turn the relay on/off
 		let turnOn = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp >= (data.relayOn || 50)).length > 0;
 		let turnOff = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp <= (data.relayOff || 35)).length > 0;
-		if(turnOn) port.write(1);
-		if(turnOff && !turnOn) port.write(0);
+		// if(turnOn) port.write(1);
+		// if(turnOff && !turnOn) port.write(0);
 
 		// Update the database
 		try {
