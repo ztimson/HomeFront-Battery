@@ -9,13 +9,8 @@
   "author": "Zak Timson",
   "license": "ISC",
   "dependencies": {
-<<<<<<< HEAD
     "axios": "^0.18.0",
     "firebase": "^5.5.8",
     "serialport": "^7.0.2"
-=======
-    "serialport": "^7.0.2",
-    "firebase": "^5.5.8"
->>>>>>> d4f29608c694fa915fa1ab5eac760ec2bd5dedea
   }
 }
