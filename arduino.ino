@@ -41,7 +41,8 @@ void loop(void) {
       digitalWrite(13, HIGH);
     }
     else {
-      Serial.println("ERR: Unkown state");
+      Serial.print("ERR: Unkown request: ");
+      Serial.println((uint8_t)incoming;
     }
   }
   
