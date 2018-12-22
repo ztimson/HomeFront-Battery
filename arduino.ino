@@ -11,6 +11,8 @@ DallasTemperature sensor1(&oneWire1);
 DallasTemperature sensor2(&oneWire2);
 DallasTemperature sensor3(&oneWire3);
 
+int relayOn = 0;
+
 void setup(void) {
   Serial.begin(9600);
   
@@ -31,8 +33,11 @@ void setup(void) {
 void loop(void) {
   // Activate relay
   if(Serial.available() > 0) {
-    String incoming = Serial.readString();
-    digitalWrite(13, incoming.toInt());
+    int incoming = Serial.readString().toInt();
+    if(incoming != relayOn) {
+      relayOn = incoming;
+      digitalWrite(13, relayOn);
+    }
     Serial.read();
   }
   
