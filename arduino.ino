@@ -42,7 +42,7 @@ void loop(void) {
     }
     else {
       Serial.print("ERR: Unkown request: ");
-      Serial.println((uint8_t)incoming;
+      Serial.println((uint8_t)incoming);
     }
   }
   
