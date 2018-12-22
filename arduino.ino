@@ -33,12 +33,16 @@ void setup(void) {
 void loop(void) {
   // Activate relay
   if(Serial.available() > 0) {
-    int incoming = Serial.readString().toInt();
-    if(incoming != relayOn) {
-      relayOn = incoming;
-      digitalWrite(13, relayOn);
+    char incoming = Serial.read();
+    if(incoming == '0') {
+      digitalWrite(13, LOW);
     }
-    Serial.read();
+    else if(incoming == '1') {
+      digitalWrite(13, HIGH);
+    }
+    else {
+      Serial.println("ERR: Unkown state");
+    }
   }
   
   // Voltage data
