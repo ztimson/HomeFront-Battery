@@ -38,7 +38,7 @@ setInterval(async () => {
 	if(!modules) return;
 
 	let doc = await firestore.collection('Battery').doc(namespace).get();
-	let data = doc.data() || {config: {}, modules: {}};
+	let data = Object.assign({config: {}, modules: {}}, doc.data());
 	const config = data.config;
 
 	// Add latest data
