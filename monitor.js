@@ -4,6 +4,7 @@ const firebase = require('firebase');
 
 const namespace = fs.readFileSync('/etc/hostname', 'utf8').trim();
 const port = new SerialPort('/dev/ttyUSB0');
+const serialParser = port.pipe(new SerialPort.parsers.Readline());
 
 firebase.initializeApp({
 	apiKey: "AIzaSyAs3FvBCADM66wR1-leBz6aIjK1wZfUxRo",
@@ -20,37 +21,37 @@ firestore.settings({timestampsInSnapshots: true});
 	// Get document and data
 	let doc = await firestore.collection('Battery').doc(namespace).get();
 	let data = doc.data() || {};
-	let once = true;
-	const config = data.config;
-
-	// Wait for sensor data
-	const serialParser = port.pipe(new SerialPort.parsers.Readline());
-	serialParser.on('data', async arduino => {
-		if(!once) return;
-
-		once = false;
+	const config = data.config || {};
+	
+	let modules;
+	serialParser.on('data', async serialIn => {
 		let sensorData = arduino.match(/\d+\.?\d*/g);
 
 		// Divide data into modules
 		let moduleCount = 0;
-		data.modules = sensorData.reduce((acc, val, i, arr) => {
+		modules = sensorData.reduce((acc, val, i, arr) => {
 			if(i % 2 == 1) return acc;
 
-			// Figure out module namename
+			// Construct data set
 			moduleCount++;
 			let name = `Module ${moduleCount}`;
-
-			// Format data
-			if(!acc[name]) acc[name] = [];
-			acc[name].push({charge: Number(val), temp: Number(arr[i + 1])});
-			acc[name].splice(0, acc[name].length - 1440);
-
-			// Return data
+			acc[name] = {charge: Number(val), temp: Number(arr[i + 1])};
 			return acc;
-		}, data.modules || {});
-
+		}, {});
+	});
+	
+	setInterval(() => {
+		if(!modules) return;
+		
+		// Add latest data
+		Object.keys(modules).forEach(key => {
+			if(!data.modules[key]) data.modules[key] = [];
+			data.modules[key].push(modules[key]);
+			data.modules[key].splice(0, acc[name].length - 1440);
+		});
+		
 		// Turn the relay on/off
-		if(config.relayMode != null) {
+		/* if(config.relayMode != null) {
 			console.log(config.relayMode, Number(config.relayMode));
 			port.write(Number(config.relayMode).toString());
 		} else {
@@ -58,16 +59,9 @@ firestore.settings({timestampsInSnapshots: true});
 			let turnOff = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp <= (config.relayOff || 35)).length > 0;
 			if(turnOn) port.write([1]);
 			if(turnOff && !turnOn) port.write([0]);
-		}
-
-		// Update the database
-		try {
-			await doc.ref[doc.exists ? 'update' : 'set'](data);
-			console.log('worked');
-			process.exit();
-		} catch(err) {
-			console.log(err);
-			process.exit(1);
-		}
-	});
+		}*/
+		
+		// Submit
+		doc.ref[doc.exists ? 'update' : 'set'](data);
+	}, 60000);
 })();
