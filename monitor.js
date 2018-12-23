@@ -25,7 +25,7 @@ firestore.settings({timestampsInSnapshots: true});
 	
 	let modules;
 	serialParser.on('data', async serialIn => {
-		let sensorData = arduino.match(/\d+\.?\d*/g);
+		let sensorData = serialIn.match(/\d+\.?\d*/g);
 
 		// Divide data into modules
 		let moduleCount = 0;
@@ -47,7 +47,7 @@ firestore.settings({timestampsInSnapshots: true});
 		Object.keys(modules).forEach(key => {
 			if(!data.modules[key]) data.modules[key] = [];
 			data.modules[key].push(modules[key]);
-			data.modules[key].splice(0, acc[name].length - 1440);
+			data.modules[key].splice(0, data.modules[key].length - 1440);
 		});
 		
 		// Turn the relay on/off
