@@ -49,15 +49,15 @@ setInterval(async () => {
 	});
 
 	// Turn the relay on/off
-	/* if(config.relayMode != null) {
+	if(config.relayMode != null) {
 		console.log(config.relayMode, Number(config.relayMode));
 		port.write(Number(config.relayMode).toString());
 	} else {
 		let turnOn = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp >= (config.relayOn || 50)).length > 0;
 		let turnOff = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp <= (config.relayOff || 35)).length > 0;
 		if(turnOn) port.write([1]);
-		if(turnOff && !turnOn) port.write([0]);
-	}*/
+		else if(turnOff) port.write([0]);
+	}
 
 	// Submit
 	doc.ref[doc.exists ? 'update' : 'set'](data);
