@@ -19,6 +19,7 @@ firestore.settings({timestampsInSnapshots: true});
 
 var modules; // Where the latest data is stored
 serialParser.on('data', async serialIn => {
+	console.log(serialIn);
 	let sensorData = serialIn.match(/\d+\.?\d*/g);
 
 	// Divide data into modules
@@ -61,4 +62,5 @@ setInterval(async () => {
 
 	// Submit
 	doc.ref[doc.exists ? 'update' : 'set'](data);
+	console.log('Updated');
 }, 60000);
