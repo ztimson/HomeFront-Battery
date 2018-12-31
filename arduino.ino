@@ -36,21 +36,19 @@ void loop(void) {
     char incoming = Serial.read();
     if(incoming == '0') {
       digitalWrite(13, LOW);
-    }
-    else if(incoming == '1') {
+    } else if(incoming == '1') {
       digitalWrite(13, HIGH);
-    }
-    else {
+    } else {
       Serial.print("ERR: Unkown request: ");
       Serial.println((uint8_t)incoming);
     }
   }
   
-  // Voltage data
-  float vin0 = analogRead(A0) * 4.648 / 1023.0 / 5 * 57.965;
-  float vin1 = analogRead(A1) * 4.648 / 1023.0 / 5 * 57.543;
-  float vin2 = analogRead(A2) * 4.648 / 1023.0 / 5 * 55.257; // 1/10 accuracy
-  float vin3 = analogRead(A3) * 4.648 / 1023.0 / 5 * 56.216; // 1/10 accuracy
+  // Voltage data: Input * 4.521 / 1023.0 / 5 * VoltDiv
+  float vin0 = analogRead(A0) * 0.0493995;
+  float vin1 = analogRead(A1) * 0.0522986;
+  float vin2 = analogRead(A2) * 0.0488798;
+  float vin3 = analogRead(A3) * 0.0500341;
   
   // Temp data
   sensor0.requestTemperatures();
