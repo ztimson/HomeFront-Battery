@@ -49,6 +49,8 @@ void loop(void) {
   float vin1 = analogRead(A1) * 0.0522986;
   float vin2 = analogRead(A2) * 0.0488798;
   float vin3 = analogRead(A3) * 0.0500341;
+  vin0 = vin0 - vin1;
+  vin2 = vin2 - vin3;
   
   // Temp data
   sensor0.requestTemperatures();
