@@ -8,3 +8,4 @@ We accomplished the software side in 3 steps:
  - [A website to display the recorded data live](https://github.com/ztimson/HomeFront)
 
 ![Power Wall](https://github.com/ztimson/HomeFront-Battery/blob/master/pictures/Resized_20181124_121520_5410.jpg?raw=true)
+![Power Wall](https://github.com/ztimson/HomeFront-Battery/blob/master/pictures/03e615d9-f1b3-4439-9341-185cd3c14f3f.jpg?raw=true)
