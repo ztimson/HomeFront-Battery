@@ -17,41 +17,37 @@ firebase.initializeApp({
 const firestore = firebase.firestore();
 firestore.settings({timestampsInSnapshots: true});
 
-var modules; // Where the latest data is stored
-serialParser.on('data', async serialIn => {
-	console.log(serialIn);
-	let sensorData = serialIn.match(/\d+\.?\d*/g);
+function getData() {
+	return new Promise(res => {
+		serialParser.on('data', async serialIn => {
+			let timestamp = new Date();
+			let raw = serialIn.split(' ');
+			let data = raw.reduce((acc, val, i, arr) => {
+				if(i % 2 == 1) return acc;
+				acc[`Module ${i}`] = {charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp};
+				return acc;
+			}, {});
+			res(data);
+		})
+	});
+}
 
-	// Divide data into modules
-	let moduleCount = 0;
-	modules = sensorData.reduce((acc, val, i, arr) => {
-		if(i % 2 == 1) return acc;
-
-		// Construct data set
-		moduleCount++;
-		let name = `Module ${moduleCount}`;
-		acc[name] = {charge: Number(val), temp: Number(arr[i + 1])};
-		return acc;
-	}, {});
-});
-
-setInterval(async () => {
-	if(!modules) return;
-
+(async() => {
+	// Init
+	let newData = await getData();
 	let doc = await firestore.collection('Battery').doc(namespace).get();
 	let data = Object.assign({config: {}, modules: {}}, doc.data());
 	const config = data.config;
 
 	// Add latest data
-	Object.keys(modules).forEach(key => {
+	Object.keys(newData).forEach(key => {
 		if(!data.modules[key]) data.modules[key] = [];
-		data.modules[key].push(modules[key]);
+		data.modules[key].push(newData[key]);
 		data.modules[key].splice(0, data.modules[key].length - 1440);
 	});
 
 	// Turn the relay on/off
 	if(config.relayMode != null) {
-		console.log(config.relayMode, Number(config.relayMode));
 		port.write(Number(config.relayMode).toString());
 	} else {
 		let turnOn = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp >= (config.relayOn || 50)).length > 0;
@@ -62,5 +58,4 @@ setInterval(async () => {
 
 	// Submit
 	doc.ref[doc.exists ? 'update' : 'set'](data);
-	console.log('Updated');
-}, 60000);
+})();
