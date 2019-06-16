@@ -18,18 +18,19 @@ firestore.settings({timestampsInSnapshots: true});
 
 function getData() {
 	return new Promise(res => {
-		port.open();
-		let serialParser = port.pipe(new SerialPort.parsers.Readline());
-		serialParser.on('data', async serialIn => {
-			port.close();
-			let timestamp = new Date();
-			let raw = serialIn.split(' ');
-			let data = raw.reduce((acc, val, i, arr) => {
-				if(i % 2 == 1) return acc;
-				acc.push({charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp});
-				return acc;
-			}, []);
-			res(data);
+		port.open(() => {
+			let serialParser = port.pipe(new SerialPort.parsers.Readline());
+			serialParser.on('data', async serialIn => {
+				if(port.isOpen) port.close();
+				let timestamp = new Date();
+				let raw = serialIn.split(' ');
+				let data = raw.reduce((acc, val, i, arr) => {
+					if(i % 2 == 1) return acc;
+					acc.push({charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp});
+					return acc;
+				}, []);
+				res(data);
+			});
 		});
 	});
 }
@@ -51,9 +52,9 @@ function getData() {
 
 	// Turn the relay on/off
 	if(config.relayMode != null) {
-		port.open();
-		port.write(Number(config.relayMode).toString());
-		port.close();
+		port.open(() =>
+			port.write(Number(config.relayMode).toString(), null, () =>
+				port.close()));
 	}
 
 	// Submit
