@@ -49,11 +49,6 @@ function getData() {
 	// Turn the relay on/off
 	if(config.relayMode != null) {
 		port.write(Number(config.relayMode).toString());
-	} else {
-		let turnOn = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp >= (config.relayOn || 50)).length > 0;
-		let turnOff = sensorData.filter((ignore, i) => i % 2 == 1).filter(temp => temp <= (config.relayOff || 35)).length > 0;
-		if(turnOn) port.write([1]);
-		else if(turnOff) port.write([0]);
 	}
 
 	// Submit
