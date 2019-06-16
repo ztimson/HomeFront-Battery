@@ -12,7 +12,8 @@ firebase.initializeApp({
 	databaseURL: "https://homefront-2ccb4.firebaseio.com",
 	projectId: "homefront-2ccb4",
 	storageBucket: "homefront-2ccb4.appspot.com",
-	messagingSenderId: "482384317544"
+	messagingSenderId: "482384317544",
+	appId: "1:482384317544:web:fa3dc6afeb4ff4c6"
 });
 const firestore = firebase.firestore();
 firestore.settings({timestampsInSnapshots: true});
@@ -36,7 +37,7 @@ function getData() {
 	// Init
 	let newData = await getData();
 	let doc = await firestore.collection('Battery').doc(namespace).get();
-	let data = Object.assign({config: {}, modules: {}}, doc.data());
+	let data = Object.assign({config: {}, modules: []}, doc.data());
 	const config = data.config;
 
 	// Add latest data
@@ -52,6 +53,6 @@ function getData() {
 	}
 
 	// Submit
-	doc.ref.set(data);
+	doc.ref.set(data).then(resp => console.log(resp)).catch(err => console.error(err));
 	process.exit();
 })();
