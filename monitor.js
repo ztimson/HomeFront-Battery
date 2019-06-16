@@ -53,6 +53,6 @@ function getData() {
 	}
 
 	// Submit
-	doc.ref.set(data);
+	await doc.ref.set(data);
 	process.exit();
 })();
