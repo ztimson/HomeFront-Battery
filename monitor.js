@@ -53,4 +53,5 @@ function getData() {
 
 	// Submit
 	doc.ref[doc.exists ? 'update' : 'set'](data);
+	process.exit();
 })();
