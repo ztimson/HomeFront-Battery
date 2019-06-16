@@ -34,13 +34,10 @@ void loop(void) {
   // Activate relay
   if(Serial.available() > 0) {
     char incoming = Serial.read();
-    if(incoming == '0') {
+    if(incoming == '5') {
       digitalWrite(13, LOW);
-    } else if(incoming == '1') {
+    } else if(incoming == '6') {
       digitalWrite(13, HIGH);
-    } else {
-      Serial.print("ERR: Unkown request: ");
-      Serial.println((uint8_t)incoming);
     }
   }
   

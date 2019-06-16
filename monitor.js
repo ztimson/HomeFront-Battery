@@ -53,7 +53,7 @@ function getData() {
 	// Turn the relay on/off
 	if(config.relayMode != null) {
 		port.open(() =>
-			port.write(Number(config.relayMode).toString(), null, () =>
+			port.write(config.relayMode ? 6 : 5, null, () =>
 				port.close()));
 	}
 
