@@ -40,10 +40,10 @@ function getData() {
 	const config = data.config;
 
 	// Add latest data
-	Object.keys(newData).forEach(key => {
-		if(!data.modules[key]) data.modules[key] = [];
-		data.modules[key].push(newData[key]);
-		data.modules[key].splice(0, data.modules[key].length - 1440);
+	Object.keys(data.modules).forEach(module => {
+		if(!data.modules[module]) data.modules[module] = [];
+		data.modules[module].push(newData[module]);
+		data.modules[module].splice(0, data.modules[module].length - 1440);
 	});
 
 	// Turn the relay on/off
