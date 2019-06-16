@@ -3,7 +3,7 @@ const SerialPort = require('serialport');
 const firebase = require('firebase');
 
 const namespace = fs.readFileSync('/etc/hostname', 'utf8').trim();
-const port = new SerialPort('/dev/ttyUSB0');
+const port = new SerialPort('/dev/ttyUSB0', {autoOpen: false});
 const serialParser = port.pipe(new SerialPort.parsers.Readline());
 
 firebase.initializeApp({
@@ -20,6 +20,7 @@ firestore.settings({timestampsInSnapshots: true});
 function getData() {
 	return new Promise(res => {
 		serialParser.on('data', async serialIn => {
+			serialParser.close();
 			let timestamp = new Date();
 			let raw = serialIn.split(' ');
 			let data = raw.reduce((acc, val, i, arr) => {
@@ -28,7 +29,8 @@ function getData() {
 				return acc;
 			}, []);
 			res(data);
-		})
+		});
+		serialParser.open();
 	});
 }
 
@@ -49,7 +51,9 @@ function getData() {
 
 	// Turn the relay on/off
 	if(config.relayMode != null) {
+		serialParser.open();
 		port.write(Number(config.relayMode).toString());
+		serialParser.close();
 	}
 
 	// Submit
