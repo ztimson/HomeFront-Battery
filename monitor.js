@@ -24,9 +24,9 @@ function getData() {
 			let raw = serialIn.split(' ');
 			let data = raw.reduce((acc, val, i, arr) => {
 				if(i % 2 == 1) return acc;
-				acc[`Module ${i}`] = {charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp};
+				acc.push({charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp});
 				return acc;
-			}, {});
+			}, []);
 			res(data);
 		})
 	});
@@ -40,10 +40,10 @@ function getData() {
 	const config = data.config;
 
 	// Add latest data
-	Object.keys(data.modules).forEach(module => {
-		if(!data.modules[module]) data.modules[module] = [];
-		data.modules[module].push(newData[module]);
-		data.modules[module].splice(0, data.modules[module].length - 1440);
+	newData.forEach((row, i) => {
+		if(!data.modules[i]) data.modules[i] = [];
+		data.modules[i].push(row);
+		data.modules[i].splice(0, data.modules[i].length - 1440);
 	});
 
 	// Turn the relay on/off
@@ -52,6 +52,6 @@ function getData() {
 	}
 
 	// Submit
-	doc.ref[doc.exists ? 'update' : 'set'](data);
+	doc.ref.set(data);
 	process.exit();
 })();
