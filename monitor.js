@@ -41,7 +41,7 @@ function getData() {
 
 	// Add latest data
 	newData.forEach((row, i) => {
-		const key = `Module ${i}`;
+		const key = `Module ${i + 1}`;
 		if(!data.modules[key]) data.modules[key] = [];
 		data.modules[key].push(row);
 		data.modules[key].splice(0, data.modules[key].length - 1440);
