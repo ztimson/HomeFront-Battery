@@ -21,15 +21,25 @@ function getData() {
 		port.open(() => {
 			let serialParser = port.pipe(new SerialPort.parsers.Readline());
 			serialParser.on('data', async serialIn => {
+				// Format data
+				let sensorData = serialIn.match(/\d+\.?\d*/g);
+				let chargeData = sensorData.filter((v, i) => i % 2 == 0);
+				let tempData = sensorData.filter((v, i) => i % 2 == 1);
+
+				// Find averages for checks
+				let chargeAvg = chargeData.reduce((acc, val) => acc, val, 0) / chargeData.length;
+				let tempAvg = tempData.reduce((acc, val) => acc, val, 0) / tempData.length;
+
+				// Check for validity
+				if(serialIn.match(/[^\d|\.|\s]/g).length != 0) return;
+				if(chargeData.length != tempData.length) return;
+				if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
+				if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
+				
+				// Submit the data
 				if(port.isOpen) port.close();
 				let timestamp = new Date();
-				let raw = serialIn.split(' ');
-				let data = raw.reduce((acc, val, i, arr) => {
-					if(i % 2 == 1) return acc;
-					acc.push({charge: Number(val), temp: Number(arr[i + 1]), timestamp: timestamp});
-					return acc;
-				}, []);
-				res(data);
+				res(chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i]), timestamp: timestamp})));
 			});
 		});
 	});
