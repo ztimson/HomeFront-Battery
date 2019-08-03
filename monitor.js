@@ -38,7 +38,7 @@ function getData() {
 			// Submit the data
 			let data = {
 				timestamp: new Date(), 
-				payload: chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
+				payload: chargeData.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
 			};
 			console.log(`(${(new Date()).toISOString()}) Output: ${JSON.stringify(data)}`);
 			res(data);
