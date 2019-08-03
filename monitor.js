@@ -22,6 +22,7 @@ function getData() {
 			let serialParser = port.pipe(new SerialPort.parsers.Readline());
 			serialParser.on('data', async serialIn => {
 				// Format data
+				console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
 				let sensorData = serialIn.match(/\d+\.?\d*/g);
 				let chargeData = sensorData.filter((v, i) => i % 2 == 0);
 				let tempData = sensorData.filter((v, i) => i % 2 == 1);
@@ -38,10 +39,12 @@ function getData() {
 				
 				// Submit the data
 				if(port.isOpen) port.close();
-				res({
+				let data = {
 					timestamp: new Date(), 
 					payload: chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
-				});
+				};
+				console.log(`(${(new Date()).toISOString()}) Output: ${JSON.stringify(data)}`);
+				res(data);
 			});
 		});
 	});
@@ -53,10 +56,12 @@ function getData() {
 	let doc = await firestore.collection('Battery').doc(namespace).collection('data').doc(data.timestamp.getTime());
 
 	// Add latest data
+	console.log(`(${(new Date()).toISOString()}) Saving...`);
 	await doc.ref.set(data.reduce((acc, row, i) => {
 		const key = `Module ${i + 1}`;
 		acc[key] = row;
 	}, {}));
+	console.log(`(${(new Date()).toISOString()}) Saved`);
 
 	// Submit
 	process.exit();
