@@ -3,7 +3,7 @@ const SerialPort = require('serialport');
 const firebase = require('firebase');
 
 const namespace = fs.readFileSync('/etc/hostname', 'utf8').trim();
-const port = new SerialPort('/dev/ttyUSB0', {autoOpen: false});
+const port = new SerialPort('/dev/ttyUSB0');
 
 firebase.initializeApp({
 	apiKey: "AIzaSyAs3FvBCADM66wR1-leBz6aIjK1wZfUxRo",
@@ -18,34 +18,31 @@ firestore.settings({timestampsInSnapshots: true});
 
 function getData() {
 	return new Promise(res => {
-		port.open(() => {
-			let serialParser = port.pipe(new SerialPort.parsers.Readline());
-			serialParser.on('data', async serialIn => {
-				// Format data
-				console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
-				let sensorData = serialIn.match(/\d+\.?\d*/g);
-				let chargeData = sensorData.filter((v, i) => i % 2 == 0);
-				let tempData = sensorData.filter((v, i) => i % 2 == 1);
+		let serialParser = port.pipe(new SerialPort.parsers.Readline());
+		serialParser.on('data', serialIn => {
+			// Format data
+			console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
+			let sensorData = serialIn.match(/\d+\.?\d*/g);
+			let chargeData = sensorData.filter((v, i) => i % 2 == 0);
+			let tempData = sensorData.filter((v, i) => i % 2 == 1);
 
-				// Find averages for checks
-				let chargeAvg = chargeData.reduce((acc, val) => acc, val, 0) / chargeData.length;
-				let tempAvg = tempData.reduce((acc, val) => acc, val, 0) / tempData.length;
+			// Find averages for checks
+			let chargeAvg = chargeData.reduce((acc, val) => acc, val, 0) / chargeData.length;
+			let tempAvg = tempData.reduce((acc, val) => acc, val, 0) / tempData.length;
 
-				// Check for validity
-				if(serialIn.match(/[^\d|\.|\s]/g).length != 0) return;
-				if(chargeData.length != tempData.length) return;
-				if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
-				if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
-				
-				// Submit the data
-				if(port.isOpen) port.close();
-				let data = {
-					timestamp: new Date(), 
-					payload: chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
-				};
-				console.log(`(${(new Date()).toISOString()}) Output: ${JSON.stringify(data)}`);
-				res(data);
-			});
+			// Check for validity
+			if(serialIn.match(/[^\d|\.|\s]/g).length != 0) return;
+			if(chargeData.length != tempData.length) return;
+			if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
+			if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
+			
+			// Submit the data
+			let data = {
+				timestamp: new Date(), 
+				payload: chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
+			};
+			console.log(`(${(new Date()).toISOString()}) Output: ${JSON.stringify(data)}`);
+			res(data);
 		});
 	});
 }
