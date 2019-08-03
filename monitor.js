@@ -23,16 +23,15 @@ function getData() {
 			// Format data
 			console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
 			let sensorData = serialIn.match(/\d+\.?\d*/g);
+			if(sensorData.length % 2 == 1) return;
+
+			// Split data & find averages
 			let chargeData = sensorData.filter((v, i) => i % 2 == 0);
 			let tempData = sensorData.filter((v, i) => i % 2 == 1);
+			let chargeAvg = chargeData.reduce((acc, val) => acc + val, 0) / chargeData.length;
+			let tempAvg = tempData.reduce((acc, val) => acc + val, 0) / tempData.length;
 
-			// Find averages for checks
-			let chargeAvg = chargeData.reduce((acc, val) => acc, val, 0) / chargeData.length;
-			let tempAvg = tempData.reduce((acc, val) => acc, val, 0) / tempData.length;
-
-			// Check for validity
-			if(serialIn.match(/[^\d|\.|\s]/g).length != 0) return;
-			if(chargeData.length != tempData.length) return;
+			// Check data for signs of corruption
 			if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
 			if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
 			
