@@ -34,6 +34,7 @@ function getData() {
 			// Check data for signs of corruption
 			if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
 			if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
+			serialParser.close();
 			
 			// Submit the data
 			let data = {
