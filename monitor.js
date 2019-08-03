@@ -38,8 +38,10 @@ function getData() {
 				
 				// Submit the data
 				if(port.isOpen) port.close();
-				let timestamp = new Date();
-				res(chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i]), timestamp: timestamp})));
+				res({
+					timestamp: new Date(), 
+					payload: chargeAvg.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
+				});
 			});
 		});
 	});
@@ -47,27 +49,15 @@ function getData() {
 
 (async() => {
 	// Init
-	let newData = await getData();
-	let doc = await firestore.collection('Battery').doc(namespace).get();
-	let data = Object.assign({config: {}, modules: {}}, doc.data());
-	const config = data.config;
+	let data = await getData();
+	let doc = await firestore.collection('Battery').doc(namespace).collection('data').doc(data.timestamp.getTime());
 
 	// Add latest data
-	newData.forEach((row, i) => {
+	await doc.ref.set(data.reduce((acc, row, i) => {
 		const key = `Module ${i + 1}`;
-		if(!data.modules[key]) data.modules[key] = [];
-		data.modules[key].push(row);
-		data.modules[key].splice(0, data.modules[key].length - 1440);
-	});
-
-	// Turn the relay on/off
-	if(config.relayMode != null) {
-		port.open(() =>
-			port.write(config.relayMode ? 6 : 5, null, () =>
-				port.close()));
-	}
+		acc[key] = row;
+	}, {}));
 
 	// Submit
-	await doc.ref.set(data);
 	process.exit();
 })();
