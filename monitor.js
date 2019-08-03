@@ -19,7 +19,7 @@ firestore.settings({timestampsInSnapshots: true});
 function getData() {
 	return new Promise(res => {
 		let serialParser = port.pipe(new SerialPort.parsers.Readline());
-		serialParser.on('data', serialIn => {
+		let listener = serialParser.on('data', serialIn => {
 			// Format data
 			console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
 			let sensorData = serialIn.match(/\d+\.?\d*/g);
@@ -34,11 +34,14 @@ function getData() {
 			// Check data for signs of corruption
 			if(Math.sqrt(chargeData.reduce((acc, val) => acc + (val - chargeAvg) ** 2, 0) / (chargeData.length - 1)) > 3) return;
 			if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
-			serialParser.close();
-			
+
+			// Cleanup
+			serialParser.removeListener(listener);
+			port.close();
+
 			// Submit the data
 			let data = {
-				timestamp: new Date(), 
+				timestamp: new Date(),
 				payload: chargeData.map((charge, i) => ({charge: Number(charge), temp: Number(tempData[i])}))
 			};
 			console.log(`(${(new Date()).toISOString()}) Output: ${JSON.stringify(data)}`);
@@ -50,7 +53,7 @@ function getData() {
 (async() => {
 	// Init
 	let data = await getData();
-	let doc = await firestore.collection('Battery').doc(namespace).collection('data').doc(data.timestamp.getTime());
+	let doc = await firestore.collection('Battery').doc(namespace).collection('data').doc(data.timestamp.getTime().toString());
 
 	// Add latest data
 	console.log(`(${(new Date()).toISOString()}) Saving...`);
