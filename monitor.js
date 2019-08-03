@@ -19,7 +19,7 @@ firestore.settings({timestampsInSnapshots: true});
 function getData() {
 	return new Promise(res => {
 		let serialParser = port.pipe(new SerialPort.parsers.Readline());
-		let listener = serialParser.on('data', serialIn => {
+		serialParser.on('data', serialIn => {
 			// Format data
 			console.log(`(${(new Date()).toISOString()}) Input: ${serialIn}`);
 			let sensorData = serialIn.match(/\d+\.?\d*/g);
@@ -36,7 +36,7 @@ function getData() {
 			if(Math.sqrt(tempData.reduce((acc, val) => acc + (val - tempAvg) ** 2, 0) / (tempData.length - 1)) > 3) return;
 
 			// Cleanup
-			serialParser.removeListener(listener);
+			serialParser.removeAllListeners();
 			port.close();
 
 			// Submit the data
@@ -57,10 +57,7 @@ function getData() {
 
 	// Add latest data
 	console.log(`(${(new Date()).toISOString()}) Saving...`);
-	await doc.ref.set(data.reduce((acc, row, i) => {
-		const key = `Module ${i + 1}`;
-		acc[key] = row;
-	}, {}));
+	await doc.set(data);
 	console.log(`(${(new Date()).toISOString()}) Saved`);
 
 	// Submit
