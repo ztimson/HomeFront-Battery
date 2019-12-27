@@ -14,13 +14,17 @@ firebase.initializeApp({
 const firestore = firebase.firestore();
 firestore.settings({timestampsInSnapshots: true});
 const powerwall = new bms('/dev/ttyACM0');
-const doc = firestore.collection('Battery').doc(namespace).collection('data').doc(new Date().toString());
+const timestamp = new Date().toString();
+const doc = firestore.collection('Battery').doc(namespace).collection('data').doc(timestamp);
 
 // Wait to accumulate data and then submit
 setTimeout(async () => {
 	try {
+		let data = powerwall.data();
+		data.timestamp = timestamp;
+
 		console.log(`(${(new Date()).toISOString()}) Saving...`);
-		await doc.set(powerwall.data());
+		await doc.set(data);
 		powerwall.close();
 		console.log(`(${(new Date()).toISOString()}) Saved`);
 		process.exit();
