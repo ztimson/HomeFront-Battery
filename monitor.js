@@ -18,10 +18,15 @@ const doc = firestore.collection('Battery').doc(namespace).collection('data').do
 
 // Wait to accumulate data and then submit
 setTimeout(async () => {
-	console.log(`(${(new Date()).toISOString()}) Saving...`);
-	await doc.set(powerwall.data());
-	powerwall.close();
-	console.log(`(${(new Date()).toISOString()}) Saved`);
-	process.exit();
+	try {
+		console.log(`(${(new Date()).toISOString()}) Saving...`);
+		await doc.set(powerwall.data());
+		powerwall.close();
+		console.log(`(${(new Date()).toISOString()}) Saved`);
+		process.exit();
+	} catch(err) {
+		console.log(err);
+		process.exit(1);
+	}
 }, 5000);
 
