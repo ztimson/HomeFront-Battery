@@ -14,8 +14,8 @@ firebase.initializeApp({
 const firestore = firebase.firestore();
 firestore.settings({timestampsInSnapshots: true});
 const powerwall = new bms('/dev/ttyACM0');
-const timestamp = new Date().toString();
-const doc = firestore.collection('Battery').doc(namespace).collection('data').doc(timestamp);
+const timestamp = new Date().getTime();
+const doc = firestore.collection('Battery').doc(namespace).collection('data').doc(timestamp.toString());
 
 // Wait to accumulate data and then submit
 setTimeout(async () => {
