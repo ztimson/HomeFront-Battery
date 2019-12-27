@@ -15,13 +15,12 @@ module.exports = class BMS {
 
 	data() {
 		return {
-			ampHorus: this.ampHours,
+			ampHours: this.ampHours,
 			avgCellVoltage: this.avgCellVoltage,
-			avgTemp: this.avgTemp,
 			capacity: this.capacity,
 			current: this.current,
-			lifetimeCharging: this.lifetimeCharging,
-			lifetimeDischarg: this.lifetimeDischarg,
+			lifetimeCharge: this.lifetimeCharge,
+			lifetimeDischarge: this.lifetimeDischarge,
 			maxCellVoltage: this.maxCellVoltage,
 			maxChargeCurrent: this.maxChargeCurrent,
 			maxDischargeCurrent: this.maxDischargeCurrent,
@@ -29,10 +28,11 @@ module.exports = class BMS {
 			minCellVoltage: this.minCellVoltage,
 			minVoltage: this.minVoltage,
 			modules: this.modules,
-			negativeContractor: this.negativeContactor,
+			negativeContactor: this.negativeContactor,
 			positiveContactor: this.positiveContactor,
 			power: this.power,
 			soc: this.soc,
+			temperature: this.avgTemp,
 			uptime: this.uptime,
 			version: this.version,
 			voltage: this.voltage,
@@ -61,9 +61,9 @@ module.exports = class BMS {
 			this.modules[id] = {
 				cells: {},
 				voltage: voltage,
-				negTermTemp: negTemp,
-				posTermTemp: posTemp,
-				temp: (negTemp + posTemp) / 2
+				negativeTemperature: negTemp,
+				positiveTemperature: posTemp,
+				temperature: (negTemp + posTemp) / 2
 			}
 
 			// Cell data
@@ -121,8 +121,8 @@ module.exports = class BMS {
 		// Lifetime
 		let lifetime = new RegExp(/Battery Lifetime Charging: (-?\d+(?:\.\d+)?) kWh\s+Discharging: (-?\d+(?:\.\d+)?) kWh/g).exec(rx);
 		if(!!lifetime) {
-			this.lifetimeCharging = Number(lifetime[1]);
-			this.lifetimeDischarg = Number(lifetime[2]);
+			this.lifetimeCharge = Number(lifetime[1]);
+			this.lifetimeDischarge = Number(lifetime[2]);
 		}
 
 		// Contactors
