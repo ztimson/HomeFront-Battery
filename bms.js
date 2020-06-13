@@ -85,7 +85,7 @@ module.exports = class BMS {
 		}
 
 		// Power
-		let power = new RegExp(/CURRENT: (-?\d+(?:\.\d+)?)A POWER: (-?\d+(?:\.\d+)?) Watts\s+AMPHOURS: (-?\d+(?:\.\d+)?) Ah\s+WATTHOURS: (-?\d+(?:\.\d+)?) Wh/g).exec(rx);
+		let power = new RegExp(/CURRENT:\s+(-?\d+(?:\.\d+)?)A\s+POWER:\s+(-?\d+(?:\.\d+)?)\s+Watts\s+AMPHOURS:\s+(-?\d+(?:\.\d+)?)\s+Ah\s+WATTHOURS:\s+(-?\d+(?:\.\d+)?)\s+Wh/g).exec(rx);
 		if(!!power) {
 			this.current = Number(power[1]);
 			this.power = Number(power[2]);
@@ -94,32 +94,32 @@ module.exports = class BMS {
 		}
 
 		// Charge/Discharge
-		let minMax = new RegExp(/Max System Discharge Current: (-?\d+(?:\.\d+)?)A Max System Charge Current: (-?\d+(?:\.\d+)?)A/g).exec(rx);
+		let minMax = new RegExp(/Max System Discharge Current:\s+(-?\d+(?:\.\d+)?)A\s+Max System Charge Current:\s+(-?\d+(?:\.\d+)?)A/g).exec(rx);
 		if(!!minMax) {
 			this.maxDischargeCurrent = Number(minMax[1]);
 			this.maxChargeCurrent = Number(minMax[2]);
 		}
 
 		// Pack Min/Max
-		let packMinMax = new RegExp(/Max Pack Voltage: (-?\d+(?:\.\d+)?)vdc Min Pack Voltage: (-?\d+(?:\.\d+)?)vdc/g).exec(rx);
+		let packMinMax = new RegExp(/Max Pack Voltage:\s+(-?\d+(?:\.\d+)?)vdc\s+Min Pack Voltage:\s+(-?\d+(?:\.\d+)?)vdc/g).exec(rx);
 		if(!!packMinMax) {
 			this.maxVoltage = Number(packMinMax[1]);
 			this.minVoltage = Number(packMinMax[2]);
 		}
 
 		// Cell Min/Max
-		let cellMinMax = new RegExp(/Current High Cell Voltage: (-?\d+(?:\.\d+)?)V Low Cell Voltage: (-?\d+(?:\.\d+)?)V/g).exec(rx);
+		let cellMinMax = new RegExp(/Current High Cell Voltage:\s+(-?\d+(?:\.\d+)?)V\s+Low Cell Voltage:\s+(-?\d+(?:\.\d+)?)V/g).exec(rx);
 		if(!!cellMinMax) {
 			this.maxCellVoltage = Number(cellMinMax[1]);
 			this.minCellVoltage = Number(cellMinMax[2]);
 		}
 
 		// Capicity
-		let capacity = new RegExp(/Configured Battery Capacity: (-?\d+(?:\.\d+)?)Ah/g).exec(rx);
+		let capacity = new RegExp(/Configured Battery Capacity:\s+(-?\d+(?:\.\d+)?)Ah/g).exec(rx);
 		if(!!capacity) this.capacity = Number(capacity[1]);
 
 		// Lifetime
-		let lifetime = new RegExp(/Battery Lifetime Charging: (-?\d+(?:\.\d+)?) kWh\s+Discharging: (-?\d+(?:\.\d+)?) kWh/g).exec(rx);
+		let lifetime = new RegExp(/Battery Lifetime Charging:\s+(-?\d+(?:\.\d+)?) kWh\s+Discharging:\s+(-?\d+(?:\.\d+)?) kWh/g).exec(rx);
 		if(!!lifetime) {
 			this.lifetimeCharge = Number(lifetime[1]);
 			this.lifetimeDischarge = Number(lifetime[2]);
