@@ -15,7 +15,6 @@ const firestore = firebase.firestore();
 firestore.settings({timestampsInSnapshots: true});
 const powerwall = new bms('/dev/ttyACM0');
 const timestamp = new Date().getTime();
-const doc = firestore.collection('Battery').doc(namespace).collection('data').doc(timestamp.toString());
 
 // Wait to accumulate data and then submit
 setTimeout(async () => {
@@ -24,7 +23,9 @@ setTimeout(async () => {
 		data.timestamp = timestamp;
 
 		console.log(`(${(new Date()).toISOString()}) Saving...`);
-		await doc.set(data);
+		await firestore.collection('Battery').doc(namespace)
+			.collection('data').doc(timestamp.toString())
+			.set(data);
 		powerwall.close();
 		console.log(`(${(new Date()).toISOString()}) Saved`);
 		process.exit();
@@ -34,3 +35,7 @@ setTimeout(async () => {
 	}
 }, 5000);
 
+// Remove any records older than 30 days
+firestore.collection('Battery').doc(namespace).collection('data')
+	.where('timestamp', '<', timestamp - 2592000000).get()
+	.then(snapshot => snapshot.forEach(doc => doc.ref.delete()));
